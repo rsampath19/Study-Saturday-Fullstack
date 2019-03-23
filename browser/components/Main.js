@@ -3,6 +3,8 @@ import axios from 'axios';
 
 import StudentList from './StudentList.js';
 import SingleStudent from './SingleStudent.js';
+import NewStudent from './NewStudentForm.js';
+import { runInNewContext } from 'vm';
 
 export default class Main extends Component {
   constructor(props) {
@@ -10,9 +12,12 @@ export default class Main extends Component {
     this.state = {
       students: [],
       selectedStudent: {},
+      showForm :false
     };
 
     this.selectStudent = this.selectStudent.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+    this.addStudent = this.addStudent.bind(this);
   }
 
   componentDidMount() {
@@ -29,9 +34,24 @@ export default class Main extends Component {
     }
   }
 
+  async addStudent(studentObj){
+    try{
+   const res = await axios.post('/student',studentObj);
+   const newStudent = res.data;
+   this.setState({students:[...this.state.students, newStudent]})
+    } catch(error){
+      console.error(error)
+    }
+  }
   selectStudent(student) {
-    return this.setState({
+   return this.setState({
       selectedStudent: student,
+    });
+  }
+
+  handleClick(){
+   return this.setState({
+      showForm: !this.state.showForm
     });
   }
 
@@ -39,6 +59,8 @@ export default class Main extends Component {
     return (
       <div>
         <h1>Students</h1>
+        <button onClick={this.handleClick}>Add New Student</button>
+        {this.state.showForm ? <NewStudent addedStudent ={this.addStudent}/> : null}
         <table>
           <thead>
             <tr>
